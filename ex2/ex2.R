@@ -4,25 +4,7 @@
 # RA 023577
 #
 setwd("~/git/mo850/ex2/")
-#install.packages(c("perm", "coin", "mvtnorm", "exactRankTests", "boot"))
-
-run_unpaired_manual = function() {
-  # data = c(x, y)
-  # ttest_pvalues = c()
-  # wilcox_pvalues = c()
-  # for (i in 1:5000) {
-  #   x_ind = sample(seq_len(length(data)), size = length(x), replace=FALSE)
-  #   x = data[x_ind]
-  #   y = data[-x_ind]
-  #   wilcox_pvalues = c(wilcox.test(x, y, paired=FALSE)$p.value, wilcox_pvalues)
-  #   ttest_pvalues = c(t.test(x, y, paired=FALSE)$p.value, ttest_pvalues)
-  # }
-  # 
-  # cat("mean of t-test p-values:", mean(ttest_pvalues))
-  # cat("mean of wilcoxon p-values:", mean(wilcox_pvalues))
-  # hist(ttest_pvalues)
-  # hist(wilcox_pvalues)
-}
+install.packages(c("perm", "coin", "mvtnorm", "exactRankTests", "boot"))
 
 run_unpaired = function() {
   # Non paired
@@ -98,7 +80,6 @@ run_ci = function() {
   results <- boot(data=data, statistic=my_mean, R=5000)
   print(boot.ci(results, type="bca"))
 }
-
 
 run_unpaired()
 run_paired()
