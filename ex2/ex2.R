@@ -3,43 +3,33 @@
 # Author: Edgar Tanaka
 # RA 023577
 #
-setwd("~/git/mo850/ex2/")
-#install.packages(c("perm", "coin", "mvtnorm", "exactRankTests", "boot"))
 
-run_unpaired_manual = function() {
-  # data = c(x, y)
-  # ttest_pvalues = c()
-  # wilcox_pvalues = c()
-  # for (i in 1:5000) {
-  #   x_ind = sample(seq_len(length(data)), size = length(x), replace=FALSE)
-  #   x = data[x_ind]
-  #   y = data[-x_ind]
-  #   wilcox_pvalues = c(wilcox.test(x, y, paired=FALSE)$p.value, wilcox_pvalues)
-  #   ttest_pvalues = c(t.test(x, y, paired=FALSE)$p.value, ttest_pvalues)
-  # }
-  # 
-  # cat("mean of t-test p-values:", mean(ttest_pvalues))
-  # cat("mean of wilcoxon p-values:", mean(wilcox_pvalues))
-  # hist(ttest_pvalues)
-  # hist(wilcox_pvalues)
-}
+# please set the current directory where this R script is located
+#setwd("~/git/mo850/ex2/")
+
+install.packages(c("perm", "coin", "mvtnorm", "exactRankTests", "boot"))
+
+set.seed(42);
 
 run_unpaired = function() {
-  # Non paired
-  # run a Monte-Carlo permutation test (5000 repetitions) and report the p-value.
   x = read.csv("a1.csv", stringsAsFactors=FALSE, header=FALSE)$V1
   y = read.csv("b1.csv", stringsAsFactors=FALSE, header=FALSE)$V1
+  data = c(x, y)
+  diffs = c()
+  m0 = mean(x) - mean(y)
   
-  DV = c(x,y)
-  IV <- factor(rep(c("A", "B"), c(length(x), length(y))))
+  # run 5000 simulations (Monte Carlo)
+  # for each simulation we'll sample x and y and calculate 
+  # mean(x) - mean(y)
+  for (i in 1:5000) {
+    x_ind = sample(seq_len(length(data)), size = length(x), replace=FALSE)
+    x = data[x_ind]
+    y = data[-x_ind]
+    diffs = c(diffs, mean(x) - mean(y))
+  }
   
-  library(coin)
-  print("p-value for unpaired data (oneway_test):")
-  print(pvalue(oneway_test(DV ~ IV,  distribution=approximate(B=5000))))
-
-  library(perm)  # for permTS()
-  print("p-value for unpaired data (permTS):")
-  print(permTS(DV ~ IV, method="exact.mc",control=permControl(nmc=5000))$p.value)
+  hist(diffs)
+  cat("For unpaired data, p-value:", sum(abs(diffs) >= abs(m0)) / length(diffs))
 }
 
 run_paired = function() {
@@ -61,7 +51,7 @@ run_paired = function() {
   hist(rndmdist)
   
   # two tailed p-value:
-  cat("Two tailed p-value:", sum(abs(rndmdist) >= abs(m0)) / length(rndmdist))
+  cat("For paired data, two tailed p-value:", sum(abs(rndmdist) >= abs(m0)) / length(rndmdist))
 }
 
 run_categorical = function() {
@@ -84,6 +74,8 @@ run_categorical = function() {
 }
 
 run_ci = function() {
+  library(boot)
+  
   # load data
   data = read.csv("single.csv", header=FALSE)$V1
 
@@ -98,7 +90,6 @@ run_ci = function() {
   results <- boot(data=data, statistic=my_mean, R=5000)
   print(boot.ci(results, type="bca"))
 }
-
 
 run_unpaired()
 run_paired()
